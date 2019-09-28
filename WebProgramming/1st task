@@ -1,0 +1,95 @@
+1. Решить задачи в книге на стр. 138, можно использовать проекты с предыдущих курсов:
+
+Сделать задачи 2, 3, 10, 12, 15.
+
+Работа с формами HTML, сессией, Cookies, XMLHTTPRequest -- показать готовое или сделать по книге.
+
+2. С помощью программы telnet или Putty выполнить задания
+отправкой HTTP-запросов к веб-серверу:
+	1) получить главную страницу методом GET в протоколе
+	HTTP 1.0;
+		co@ks:~$ telnet example.com 80
+		Trying 93.184.216.34...
+		Connected to example.com.
+		Escape character is '^]'.
+		GET / HTTP/1.0
+		HTTP/1.0 408 Request Timeout
+		Content-Type: text/html
+		Content-Length: 431
+		Connection: close
+		Date: Mon, 16 Sep 2019 16:26:13 GMT
+		Server: ECSF (dcb/7FA7)
+
+		<?xml version="1.0" encoding="iso-8859-1"?>
+		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+			<head>
+				<title>408 - Request Timeout</title>
+			</head>
+			<body>
+				<h1>408 - Request Timeout</h1>
+				<div>Server timeout waiting for the HTTP request from the client.</div>
+			</body>
+		</html>
+		Connection closed by foreign host.
+
+	2) получить внутреннюю страницу методом GET в протоколе
+HTTP 1.1;
+
+html telnet 127.0.0.1 80
+Trying 127.0.0.1...
+Connected to 127.0.0.1.
+Escape character is '^]'.
+GET /myPage.html
+<!DOCTYPE html>
+<html>
+<head>
+        <title>Моя страница</title>
+</head>
+<body>
+        Здесь будет много важной и интересной информации (наверное)
+</body>
+</html>Connection closed by foreign host.
+
+
+	3) определить размер файла file.tar.gz, не скачивая его;
+
+telnet localhost 23
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+Ubuntu 18.04.2 LTS
+ks login: co
+Password:
+Last login: Thu Apr 25 21:35:48 MSK 2019 on tty5
+Welcome to Ubuntu 18.04.2 LTS (GNU/Linux 5.0.0-27-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+
+ * Canonical Livepatch is available for installation.
+   - Reduce system reboots and improve kernel security. Activate at:
+     https://ubuntu.com/livepatch
+
+Могут быть обновлены 257 пакетов.
+0 обновлений касаются безопасности системы.
+
+Your Hardware Enablement Stack (HWE) is supported until April 2023.
+*** Требуется перезагрузка системы ***
+➜  ~ cd /var/www/html
+➜  html ls -sh file.tar.gz
+4,0K file.tar.gz
+➜  html
+
+	4) определить медиатип ресурса /image.png;
+
+➜  html file image.png
+image.png: PNG image data, 500 x 500, 8-bit/color RGBA, non-interlaced
+
+
+	5) отправить комментарий на сервер по адресу /index.php;
+	6) получить первые 100 байт файла /file.tar.gz;
+	7) определить кодировку ресурса /index.php.
