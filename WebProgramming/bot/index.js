@@ -24,7 +24,7 @@ wss.broadcast = function(data, clientValidator = () => true) {
 }
 
 const MongoClient = require("mongodb").MongoClient;
-const mongoClient = new MongoClient("mongodb://localhost:27017/");
+const mongoClient = new MongoClient("mongodb://localhost:27017/",{autoIndex: false});
 
 mongoClient.connect(async function(err, cur){
     const db = cur.db("SupportDB");
@@ -103,21 +103,34 @@ mongoClient.connect(async function(err, cur){
                 }
 
             }
-            let select = await cycle.find({token:message.token}).toArray();
-            if (select.length === 0){
-                let res = await collection.find({work: true}).toArray();
-                let worker = res[Math.round( Math.random() * (res.length -1) )].id;
-                console.log('stop')
-                res = await collection.update({id:worker},{$set:{busy:true}});
-                // db.worker.update({id:485915563},{$set:{busy:false}})
-                let ins = await cycle.insert({'ws': ws, 'worker': worker, 'token':message.token});
-                if (ins.result.n && res)
-                    console.log(ins);
-                bot.sendMessage(worker, message.text);
-                // usersList[message.token] = {'ws': ws, 'worker': worker};
-                // workerList[worker] = ws;
+            let select = await cycle.findOne({token:message.token});
+            if (select === null){
+                collection.find({work: true}).toArray()
+                    .then(async (res)=>{
+                        let worker = res[Math.round( Math.random() * (res.length -1) )].id;
+                        console.log('stop')
+                        // let upd = await collection.updateOne({id:worker},{$set:{busy:true}});
+                        // db.worker.update({id:485915563},{$set:{busy:false}})
+                        cycle.insertMany({'ws': wsZ, 'worker': worker, 'token':message.token})
+                            .then( ins => {
+                                    console.log(ins);
+                                    bot.sendMessage(worker, message.text);
+                                }, (err) =>
+                                    console.log(err)
+                            );
+                        // if (ins.result.n && upd.result.n){
+                        // if (ins){
+                        //     console.log(ins);
+                        //     bot.sendMessage(worker, message.text);
+                        // }
+
+                        // usersList[message.token] = {'ws': ws, 'worker': worker};
+                        // workerList[worker] = ws;
+                    },(err)=>
+                        console.log(err)
+                    );
             }   else
-                bot.sendMessage(select[0].worker, message.text);
+                bot.sendMessage(select.worker, message.text);
         });
 
     });
