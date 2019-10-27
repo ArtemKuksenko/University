@@ -3,6 +3,7 @@
  *      обход блокировок: https://habr.com/ru/sandbox/115246/
  *      полезности: https://core.telegram.org/bots/api#getupdates
  */
+
 let TelegramBot = require('node-telegram-bot-api');
 const token = '649101019:AAG3MkoP_U0XsQ9qCqB4YGCNCcrP0RWU0bI';
 const WebSocket = require('ws');
@@ -15,12 +16,11 @@ let workerListByWs = [];
 const chatBotAdmin = 485915563;
 
 wss.broadcast = function(data, clientValidator = () => true) {
-
     this.clients.forEach(client => {
         if (clientValidator(client)) {
-        client.send(data);
-    }
-});
+            client.send(data);
+        }
+    });
 }
 
 const MongoClient = require("mongodb").MongoClient;
@@ -33,7 +33,6 @@ mongoClient.connect(async function(err, cur){
 
     res = await collection.find().toArray()
 
-    console.log(res)
     var bot = new TelegramBot(token, {
         polling: true,
         request: {
@@ -48,21 +47,22 @@ mongoClient.connect(async function(err, cur){
             "/start - начать работать" +
             "/end - закончить работу" +
             "/leave - покинуть нас")
-    });
+    })
+
     bot.onText(/\/score()/,async (sender,msg) => {
     let res = await collection.findOne({id:sender.from.id},{score: 1})
     bot.sendMessage(sender.from.id, "твой счет: "+res.score)
-    console.log(res)
-    });
+    })
 
     bot.onText(/\/start()/,(sender,msg) => {
     collection.update({id:sender.from.id},{$set:{work:true}})
     bot.sendMessage(sender.from.id, "жди сообщений )")
-    });
+    })
+
     bot.onText(/\/end()/,(sender,msg) => {
     collection.update({id:sender.from.id},{$set:{work:false}})
     bot.sendMessage(sender.from.id, "тишина и покой, не будет писем пока")
-    });
+    })
 
     bot.onText(/\/leave()/,async (sender,msg) => {
         let res = await collection.remove({id:sender.from.id});
@@ -70,7 +70,7 @@ mongoClient.connect(async function(err, cur){
             bot.sendMessage(sender.from.id, "Пока,\nНадеюсь ты нашел работу по лучше)");
         else
             bot.sendMessage(sender.from.id, "Ты и так не с нами,\nЧто мертво - умереть не может\n(c)Грейджои из замка Пайк");
-    });
+    })
 
     bot.onText(/\/registration (.+)/,async function (msg, match) {
         // let fromId = msg.from.id;
@@ -84,7 +84,7 @@ mongoClient.connect(async function(err, cur){
         } else {
             bot.sendMessage(fromId, 'Не, ну ты уже и так с нами xD');
         }
-    });
+    })
 
     bot.onText(/\/closeDialog()/,async (msg)=> {
         let worker = msg.from.id;
@@ -97,26 +97,18 @@ mongoClient.connect(async function(err, cur){
             delete workerListByWs[ws];
             delete wsListByWorker[worker];
         }
+    })
 
-
-    });
-
-    // Простая команда без параметров
     bot.onText(/()/,function (msg) {
         if(msg.text[0] !== '/'){
             wsListByWorker[msg.from.id].send(msg.text);
         }
     })
-    // bot.on('message', function (msg) {
-    //     workerList[msg.from.id].send(msg.text);
-    // });
 
     wss.on("connection", ws => {
-        console.log('connect');
         ws.on('message', async (message) => {
             let messageText = message;
             message = JSON.parse(message);
-            console.log('пришло', messageText);
             if (message.text === undefined) {
 
                 let res = await collection.find({work: true, busy: false}).toArray();
@@ -131,7 +123,6 @@ mongoClient.connect(async function(err, cur){
                 if (select === null){
                     let res = await collection.find({work: true}).toArray();
                     let worker = res[Math.round( Math.random() * (res.length -1) )].id;
-                    console.log('stop')
                     res = await collection.update({id:worker},{$set:{busy:true}});
                     let ins = await cycle.insert({'worker': worker, 'token':message.token});
                     bot.sendMessage(worker, message.text);
@@ -141,24 +132,9 @@ mongoClient.connect(async function(err, cur){
                     bot.sendMessage(select.worker, message.text);
             }
 
-        });
-    });
+        })
+    })
 
-    // closeConnection = async (ws) => {
-    //      let worker = workerListByWs[ws];
-    //      await collection.update({id:worker},{$set:{busy:false}});
-    //      await cycle.remove({id:worker});
-    //      delete workerListByWs[ws];
-    //      delete wsListByWorker[worker];
-    //      ws.close();
-    // }
-    wss.on('close', ws => ws.close() );
-    // wss.on('disconnect', closeConnection(ws));
-    // socket.on('error', function (ws,err) {
-    //     console.log(ws)
-    // });
+    wss.on('close', ws => ws.close() )
 
-
-
-
-});
+})
