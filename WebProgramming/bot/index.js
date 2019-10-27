@@ -73,12 +73,11 @@ mongoClient.connect(async function(err, cur){
     })
 
     bot.onText(/\/registration (.+)/,async function (msg, match) {
-        // let fromId = msg.from.id;
+        let fromId = msg.from.id;
         let name = match[1];
-        // bot.sendMessage(fromId, name);
         let res = await collection.find({id:fromId}).toArray();
         if (res.length === 0){
-            let ins = await collection.insert({id:fromId, name: name,score:0});
+            let ins = await collection.insert({id:fromId, name: name,score:0,busy:false,work:true});
             if (ins.result.n)
                 bot.sendMessage(fromId,'Привет, ты успешно зарегистрирован )')
         } else {
@@ -115,7 +114,6 @@ mongoClient.connect(async function(err, cur){
                 if (res.length === 0) {
                     bot.sendMessage(chatBotAdmin, 'Нет никого в техподдрежке!');
                     ws.send('Извините, сейчас нет менеджеров онлайн');
-
                 }
 
             } else {
@@ -131,7 +129,6 @@ mongoClient.connect(async function(err, cur){
                 }   else
                     bot.sendMessage(select.worker, message.text);
             }
-
         })
     })
 
