@@ -133,5 +133,4 @@ mongoClient.connect(async function(err, cur){
     })
 
     wss.on('close', ws => ws.close() )
-
 })
